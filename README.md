@@ -12,5 +12,5 @@ Run the application.
 Right-click on the Tray Icon and select "Start Automatically".
 
 Uninstall:
-Ricght-click on the Tray Icon and de-select "Start Automatically".
+Right-click on the Tray Icon and de-select "Start Automatically".
 Delete the files.
