@@ -42,7 +42,7 @@ namespace WallpaperChange
                 if (DateTime.Now - lastRan > TimeSpan.FromMinutes(15))
                 {
                     lastRan = DateTime.Now;
-
+                    ChangeWallpaper();
                 }
                 Thread.Sleep(10000);
             }
@@ -54,7 +54,7 @@ namespace WallpaperChange
             int timeSlot = 0;
             foreach (int key in _TimeSlots.Keys)
             {
-                if (key < now.Hour)
+                if (key <= now.Hour)
                     timeSlot = key;
                 else
                     break;
