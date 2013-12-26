@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -15,7 +16,8 @@ namespace WallpaperChange
 
         public static void AddStartup()
         {
-            rkApp.SetValue(TITLE, Assembly.GetExecutingAssembly().CodeBase);
+            Uri executingAsm = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            rkApp.SetValue(TITLE, "\"" + executingAsm.LocalPath + "\"");
         }
 
         public static void RemoveStartup()
