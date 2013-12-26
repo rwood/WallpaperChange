@@ -15,7 +15,7 @@ namespace WallpaperChange
         [STAThread]
         public static void Main(string[] args)
         {
-            Downloader.GetProperResPictures();
+            //Downloader.GetProperResPictures();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Changer());
