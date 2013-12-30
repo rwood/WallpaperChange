@@ -34,6 +34,10 @@ namespace WallpaperChange
 
         private void LoadConfig()
         {
+            if (_TimeSlots == null)
+                _TimeSlots = new SortedDictionary<TimeSpan, string>();
+            else
+                _TimeSlots.Clear();
             Regex time = new Regex("(?<hour>\\d?\\d):(?<min>\\d\\d)");
             foreach (string item in ConfigurationManager.AppSettings.Keys)
             {
@@ -75,6 +79,7 @@ namespace WallpaperChange
 
         void ChangeWallpaper()
         {
+            LoadConfig();
             DateTime now = DateTime.Now;
             TimeSpan n = now - new DateTime(now.Year, now.Month, now.Day);
             TimeSpan timeSlot = TimeSpan.MinValue;
