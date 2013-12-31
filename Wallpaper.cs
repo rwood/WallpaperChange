@@ -8,6 +8,13 @@ using System.Windows.Forms;
 
 namespace WallpaperChange
 {
+    public enum WallpaperStyle : int
+    {
+        Tiled,
+        Centered,
+        Stretched
+    }
+
     public static class Wallpaper
     {
         const int SPI_SETDESKWALLPAPER = 20;
@@ -16,15 +23,8 @@ namespace WallpaperChange
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
-
-        public enum Style : int
-        {
-            Tiled,
-            Centered,
-            Stretched
-        }
-
-        public static void Set(FileInfo file, Style style)
+        
+        public static void Set(FileInfo file, WallpaperStyle style)
         {
             RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
             using (System.IO.Stream s = file.OpenRead())
@@ -37,19 +37,19 @@ namespace WallpaperChange
                     img.Save(tempPath, System.Drawing.Imaging.ImageFormat.Bmp);
                 }
 
-                if (style == Style.Stretched)
+                if (style == WallpaperStyle.Stretched)
                 {
                     key.SetValue(@"WallpaperStyle", 2.ToString());
                     key.SetValue(@"TileWallpaper", 0.ToString());
                 }
 
-                if (style == Style.Centered)
+                if (style == WallpaperStyle.Centered)
                 {
                     key.SetValue(@"WallpaperStyle", 1.ToString());
                     key.SetValue(@"TileWallpaper", 0.ToString());
                 }
 
-                if (style == Style.Tiled)
+                if (style == WallpaperStyle.Tiled)
                 {
                     key.SetValue(@"WallpaperStyle", 1.ToString());
                     key.SetValue(@"TileWallpaper", 1.ToString());

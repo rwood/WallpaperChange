@@ -19,6 +19,7 @@ namespace WallpaperChange
         Thread _Thread;
         bool _Running = false;
         TimeSpan _LastTimeSlot = TimeSpan.MinValue;
+        WallpaperStyle _WallpaperStyle = WallpaperStyle.Centered;
 
         public void Start()
         {
@@ -60,6 +61,17 @@ namespace WallpaperChange
                 {
                     _TransitionTime = Convert.ToInt32(value);
                 }
+                else if (item == "style")
+                {
+                    try
+                    {
+                        _WallpaperStyle = (WallpaperStyle)Enum.Parse(typeof(WallpaperStyle), value);
+                    }
+                    catch
+                    {
+                        _WallpaperStyle = WallpaperStyle.Centered;
+                    }
+                }
             }
         }
 
@@ -100,7 +112,7 @@ namespace WallpaperChange
                     DoTransition(newWp, currentWp);
                 }
                 if (newWp.Exists)
-                    Wallpaper.Set(newWp, Wallpaper.Style.Centered);    
+                    Wallpaper.Set(newWp, _WallpaperStyle);    
             }
         }
 
@@ -120,7 +132,7 @@ namespace WallpaperChange
                         break;
                     MatrixBlend(currentWp.FullName, newWallpaper.FullName, resultWp.FullName, i);
                     resultWp.Refresh();
-                    Wallpaper.Set(resultWp, Wallpaper.Style.Centered);
+                    Wallpaper.Set(resultWp, _WallpaperStyle);
                     resultWp.Delete();
                     resultWp.Refresh();
                     Thread.Sleep(timeIncrement);
