@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -13,13 +12,13 @@ namespace WallpaperChange
 {
     public class WallpaperChanger
     {
+        private TimeSpan _LastTimeSlot = TimeSpan.MinValue;
+        private bool _Running = false;
+        private Thread _Thread;
         private SortedDictionary<TimeSpan, string> _TimeSlots = new SortedDictionary<TimeSpan, string>();
         private int _TransitionSlices = 5;
         private int _TransitionTime = 10;
-        Thread _Thread;
-        bool _Running = false;
-        TimeSpan _LastTimeSlot = TimeSpan.MinValue;
-        WallpaperStyle _WallpaperStyle = WallpaperStyle.Centered;
+        private WallpaperStyle _WallpaperStyle = WallpaperStyle.Centered;
 
         public void Start()
         {
@@ -33,6 +32,104 @@ namespace WallpaperChange
             _Thread.Start();
         }
 
+        public void Stop()
+        {
+            _Running = false;
+            _Thread.Join();
+        }
+
+        private static void MatrixBlend(string baseImagePath, string overlayImagePath, string resultpath, float alpha)
+        {
+            using (Bitmap image1 = (Bitmap)Bitmap.FromFile(baseImagePath))
+            {
+                using (Bitmap image2 = (Bitmap)Bitmap.FromFile(overlayImagePath))
+                {
+                    // just change the alpha
+                    ColorMatrix matrix = new ColorMatrix(new float[][]{
+                new float[] {1F, 0, 0, 0, 0},
+                new float[] {0, 1F, 0, 0, 0},
+                new float[] {0, 0, 1F, 0, 0},
+                new float[] {0, 0, 0, alpha, 0},
+                new float[] {0, 0, 0, 0, 1F}});
+
+                    ImageAttributes imageAttributes = new ImageAttributes();
+                    imageAttributes.SetColorMatrix(matrix);
+
+                    using (Graphics g = Graphics.FromImage(image1))
+                    {
+                        g.CompositingMode = CompositingMode.SourceOver;
+                        g.CompositingQuality = CompositingQuality.HighQuality;
+
+                        g.DrawImage(image2,
+                            new Rectangle(0, 0, image1.Width, image1.Height),
+                            0,
+                            0,
+                            image2.Width,
+                            image2.Height,
+                            GraphicsUnit.Pixel,
+                            imageAttributes);
+
+                        image1.Save(resultpath, ImageFormat.Bmp);
+                    }
+                }
+            }
+        }
+
+        private void ChangeWallpaper()
+        {
+            LoadConfig();
+            DateTime now = DateTime.Now;
+            TimeSpan n = now - new DateTime(now.Year, now.Month, now.Day);
+            TimeSpan timeSlot = TimeSpan.MinValue;
+            foreach (TimeSpan key in _TimeSlots.Keys)
+            {
+                if (key <= n)
+                    timeSlot = key;
+                else
+                    break;
+            }
+            if (timeSlot == TimeSpan.MinValue)
+                return;
+            if (_LastTimeSlot != timeSlot)
+            {
+                _LastTimeSlot = timeSlot;
+                FileInfo newWp = new FileInfo(_TimeSlots[timeSlot]);
+                FileInfo currentWp = new FileInfo(Path.Combine(Path.GetTempPath(), "wallpaper.bmp"));
+                if (currentWp.Exists)
+                {
+                    DoTransition(newWp, currentWp);
+                }
+                if (newWp.Exists)
+                    Win32Wallpaper.Set(newWp, _WallpaperStyle);
+            }
+        }
+
+        private void DoTransition(FileInfo newWallpaper, FileInfo currentWp)
+        {
+            if (currentWp.Exists)
+            {
+                FileInfo resultWp = new FileInfo(Path.Combine(Path.GetTempPath(), "transform.bmp"));
+                currentWp = currentWp.CopyTo(Path.Combine(Path.GetTempPath(), "original.bmp"), true);
+                currentWp.Refresh();
+                float alphaIncrement = 1.0f / _TransitionSlices;
+                int timeIncrement = Convert.ToInt32(_TransitionTime / _TransitionSlices);
+
+                for (float i = .0f; i <= 1f; i += alphaIncrement)
+                {
+                    if (!_Running)
+                        break;
+                    MatrixBlend(currentWp.FullName, newWallpaper.FullName, resultWp.FullName, i);
+                    resultWp.Refresh();
+                    Win32Wallpaper.Set(resultWp, _WallpaperStyle);
+                    resultWp.Delete();
+                    resultWp.Refresh();
+                    Thread.Sleep(timeIncrement);
+                }
+            }
+            //if (newWp.Exists)
+            //    Wallpaper.Set(newWp, Wallpaper.Style.Centered);
+        }
+
         private void LoadConfig()
         {
             if (_TimeSlots == null)
@@ -44,7 +141,7 @@ namespace WallpaperChange
             {
                 Match m = time.Match(item);
                 string value = ConfigurationManager.AppSettings[item];
-                if(string.IsNullOrEmpty(value))
+                if (string.IsNullOrEmpty(value))
                     continue;
                 if (m.Success)
                 {
@@ -88,105 +185,5 @@ namespace WallpaperChange
                 Thread.Sleep(1000);
             }
         }
-
-        void ChangeWallpaper()
-        {
-            LoadConfig();
-            DateTime now = DateTime.Now;
-            TimeSpan n = now - new DateTime(now.Year, now.Month, now.Day);
-            TimeSpan timeSlot = TimeSpan.MinValue;
-            foreach (TimeSpan key in _TimeSlots.Keys)
-            {
-                if (key <= n)
-                    timeSlot = key;
-                else
-                    break;
-            }
-            if (timeSlot == TimeSpan.MinValue)
-                return;
-            if (_LastTimeSlot != timeSlot)
-            {
-                _LastTimeSlot = timeSlot;
-                FileInfo newWp = new FileInfo(_TimeSlots[timeSlot]);
-                FileInfo currentWp = new FileInfo(Path.Combine(Path.GetTempPath(), "wallpaper.bmp"));
-                if (currentWp.Exists)
-                {
-                    DoTransition(newWp, currentWp);
-                }
-                if (newWp.Exists)
-                    Wallpaper.Set(newWp, _WallpaperStyle);    
-            }
-        }
-
-        private void DoTransition(FileInfo newWallpaper, FileInfo currentWp)
-        {
-            if (currentWp.Exists)
-            {
-                FileInfo resultWp = new FileInfo(Path.Combine(Path.GetTempPath(), "transform.bmp"));
-                currentWp = currentWp.CopyTo(Path.Combine(Path.GetTempPath(), "original.bmp"), true);
-                currentWp.Refresh();
-                float alphaIncrement = 1.0f / _TransitionSlices;
-                int timeIncrement = Convert.ToInt32(_TransitionTime / _TransitionSlices);
-
-                for (float i = .0f; i <= 1f; i += alphaIncrement)
-                {
-                    if (!_Running)
-                        break;
-                    MatrixBlend(currentWp.FullName, newWallpaper.FullName, resultWp.FullName, i);
-                    resultWp.Refresh();
-                    Wallpaper.Set(resultWp, _WallpaperStyle);
-                    resultWp.Delete();
-                    resultWp.Refresh();
-                    Thread.Sleep(timeIncrement);
-                }
-            }
-            //if (newWp.Exists)
-            //    Wallpaper.Set(newWp, Wallpaper.Style.Centered);
-        }
-
-        private static void MatrixBlend(string baseImagePath, string overlayImagePath, string resultpath, float alpha)
-        {
-            using (Bitmap image1 = (Bitmap)Bitmap.FromFile(baseImagePath))
-            {
-                using (Bitmap image2 = (Bitmap)Bitmap.FromFile(overlayImagePath))
-                {
-                    // just change the alpha
-                    ColorMatrix matrix = new ColorMatrix(new float[][]{
-                new float[] {1F, 0, 0, 0, 0},
-                new float[] {0, 1F, 0, 0, 0},
-                new float[] {0, 0, 1F, 0, 0},
-                new float[] {0, 0, 0, alpha, 0},
-                new float[] {0, 0, 0, 0, 1F}});
-
-                    ImageAttributes imageAttributes = new ImageAttributes();
-                    imageAttributes.SetColorMatrix(matrix);
-
-                    using (Graphics g = Graphics.FromImage(image1))
-                    {
-                        g.CompositingMode = CompositingMode.SourceOver;
-                        g.CompositingQuality = CompositingQuality.HighQuality;
-
-                        g.DrawImage(image2,
-                            new Rectangle(0, 0, image1.Width, image1.Height),
-                            0,
-                            0,
-                            image2.Width,
-                            image2.Height,
-                            GraphicsUnit.Pixel,
-                            imageAttributes);
-                        
-                        image1.Save(resultpath, ImageFormat.Bmp);
-                    }
-                }
-            }
-        }
-
-
-        public void Stop()
-        {
-            _Running = false;
-            _Thread.Join();
-        }
     }
-
 }

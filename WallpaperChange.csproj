@@ -81,7 +81,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
-    <Compile Include="Wallpaper.cs" />
+    <Compile Include="Win32Wallpaper.cs" />
     <Compile Include="WallpaperChanger.cs" />
   </ItemGroup>
   <ItemGroup>
