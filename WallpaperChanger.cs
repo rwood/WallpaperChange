@@ -102,6 +102,8 @@ namespace WallpaperChange
                 else
                     break;
             }
+            if (timeSlot == TimeSpan.MinValue)
+                return;
             if (_LastTimeSlot != timeSlot)
             {
                 _LastTimeSlot = timeSlot;
