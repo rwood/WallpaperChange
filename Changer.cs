@@ -9,18 +9,19 @@ namespace WallpaperChange
 
         public Changer()
         {
+            Startup.RemoveStartup();
             InitializeComponent();
-            btnStartAutomatically.Checked = Startup.StartupEnabled;
             _Changer.Start();
+            btnStartAutomatically.Checked = Startup.StartupFolderShortcutExists();
         }
 
         private void btnStartAutomatically_Click(object sender, EventArgs e)
         {
-            if (Startup.StartupEnabled)
-                Startup.RemoveStartup();
-            else
-                Startup.AddStartup();
-            btnStartAutomatically.Checked = Startup.StartupEnabled;
+            bool exists = Startup.StartupFolderShortcutExists();
+            if (btnStartAutomatically.Checked && !exists)
+                Startup.CreateStartupFolderShortcut();
+            else if (!btnStartAutomatically.Checked && exists)
+                Startup.DeleteStartupFolderShortcuts();
         }
 
         private void btnStop_Click(object sender, EventArgs e)
