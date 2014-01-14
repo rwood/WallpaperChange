@@ -3,7 +3,7 @@ WallpaperChange
 
 Changes the wallpaper based on the time of day.
 
-Download Binaries: http://tamarau.com/WallpaperChange/WallpaperChange_0.5.zip
+Download Binaries: http://tamarau.com/WallpaperChange/WallpaperChange_0.6.zip
 
 Install:
 Download and unzip the application.  
@@ -22,6 +22,7 @@ The transition_slices value tells the program how many intermediate pictures to 
 The transition_time_ms value tells the program how long the entire transition should take. 
 The default is 10 frames over 5 seconds.
 
+v0.6 Changed the startup method from a registry entry to a lnk in the Startup folder.
 v0.5 Fixed another bug, should solve the crashing on resume issue.  Re-organized the code a bit.
 v0.4 Added config option to make the wallpaper style Tiled, Centered or Stretched (case-sensitive).
 v0.3 fixes issue with crashing after leaving your computer for a while.
