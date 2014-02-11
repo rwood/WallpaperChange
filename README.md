@@ -8,11 +8,11 @@ Download Binaries: http://tamarau.com/WallpaperChange/WallpaperChange_0.6.zip
 Install:
 Download and unzip the application.  
 Run the application.
-Right-click on the Tray Icon and select "Start Automatically".
 
 Uninstall:
-Right-click on the Tray Icon and de-select "Start Automatically".
 Delete the files.
+
+You can add a shortcut for the application to the startup folder to get it to start automatically.
 
 
 Configuration:
@@ -22,6 +22,7 @@ The transition_slices value tells the program how many intermediate pictures to 
 The transition_time_ms value tells the program how long the entire transition should take. 
 The default is 10 frames over 5 seconds.
 
+v0.7 Removed the phantom window.  Removed start automotically from the tray.  It was problematic.
 v0.6 Changed the startup method from a registry entry to a lnk in the Startup folder.
 v0.5 Fixed another bug, should solve the crashing on resume issue.  Re-organized the code a bit.
 v0.4 Added config option to make the wallpaper style Tiled, Centered or Stretched (case-sensitive).
