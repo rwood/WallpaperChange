@@ -3,7 +3,7 @@ WallpaperChange
 
 Changes the wallpaper based on the time of day.
 
-Download Binaries: http://tamarau.com/WallpaperChange/WallpaperChange_0.6.zip
+Download Binaries: http://tamarau.com/WallpaperChange/WallpaperChange_0.7.zip
 
 Install:
 Download and unzip the application.  
