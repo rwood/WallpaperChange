@@ -95,13 +95,16 @@ namespace WallpaperChange
                 _LastTimeSlot = timeSlot;
                 FileInfo newWp = new FileInfo(_TimeSlots[timeSlot]);
                 FileInfo currentWp = new FileInfo(Path.Combine(Path.GetTempPath(), "wallpaper.bmp"));
+                /*if (!newWp.Exists)
+                    return;*/
                 if (currentWp.Exists)
                 {
                     DoTransition(newWp, currentWp);
                 }
-                if (newWp.Exists)
+                else
                     Win32Wallpaper.Set(newWp, _WallpaperStyle);
             }
+
         }
 
         private void DoTransition(FileInfo newWallpaper, FileInfo currentWp)
@@ -125,6 +128,10 @@ namespace WallpaperChange
                     resultWp.Refresh();
                     Thread.Sleep(timeIncrement);
                 }
+                resultWp = newWallpaper.CopyTo(Path.Combine(Path.GetTempPath(), "wallpaper.bmp"), true);
+                resultWp.Refresh();
+                Win32Wallpaper.Set(resultWp, _WallpaperStyle);
+                resultWp.Refresh();
             }
             //if (newWp.Exists)
             //    Wallpaper.Set(newWp, Wallpaper.Style.Centered);
