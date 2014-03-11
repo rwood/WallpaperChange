@@ -8,7 +8,8 @@ namespace WallpaperChange
     {
         Tiled,
         Centered,
-        Stretched
+        Stretched,
+        Fill
     }
 
     public static class Win32Wallpaper
@@ -45,6 +46,12 @@ namespace WallpaperChange
                 {
                     key.SetValue(@"WallpaperStyle", 1.ToString());
                     key.SetValue(@"TileWallpaper", 1.ToString());
+                }
+
+                if (style == WallpaperStyle.Fill)
+                {
+                    key.SetValue(@"WallpaperStyle", 10.ToString());
+                    key.SetValue(@"TileWallpaper", 0.ToString());
                 }
 
                 SystemParametersInfo(SPI_SETDESKWALLPAPER,
