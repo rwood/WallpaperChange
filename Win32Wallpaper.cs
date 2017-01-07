@@ -1,33 +1,32 @@
-﻿using Microsoft.Win32;
+﻿using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 namespace WallpaperChange
 {
-    public enum WallpaperStyle : int
-    {
-        Tiled,
-        Centered,
-        Stretched,
-        Fill
-    }
-
     public static class Win32Wallpaper
     {
-        private const int SPI_SETDESKWALLPAPER = 20;
-        private const int SPIF_SENDWININICHANGE = 0x02;
-        private const int SPIF_UPDATEINIFILE = 0x01;
+        private const int SpiSetdeskwallpaper = 20;
+        private const int SpifSendwininichange = 0x02;
+        private const int SpifUpdateinifile = 0x01;
+
         public static void Set(FileInfo file, WallpaperStyle style)
         {
-            RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
-            using (System.IO.Stream s = file.OpenRead())
+            var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
+            if (key == null)
             {
-                string tempPath = file.FullName;
+                return;
+            }
+            using (Stream s = file.OpenRead())
+            {
+                var tempPath = file.FullName;
                 if (!file.Name.Equals("wallpaper.bmp"))
                 {
-                    System.Drawing.Image img = System.Drawing.Image.FromStream(s);
+                    var img = Image.FromStream(s);
                     tempPath = Path.Combine(Path.GetTempPath(), "wallpaper.bmp");
-                    img.Save(tempPath, System.Drawing.Imaging.ImageFormat.Bmp);
+                    img.Save(tempPath, ImageFormat.Bmp);
                 }
 
                 if (style == WallpaperStyle.Stretched)
@@ -54,10 +53,10 @@ namespace WallpaperChange
                     key.SetValue(@"TileWallpaper", 0.ToString());
                 }
 
-                SystemParametersInfo(SPI_SETDESKWALLPAPER,
+                SystemParametersInfo(SpiSetdeskwallpaper,
                     0,
                     tempPath,
-                    SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
+                    SpifUpdateinifile | SpifSendwininichange);
             }
         }
 

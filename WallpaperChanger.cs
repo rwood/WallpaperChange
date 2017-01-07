@@ -1,61 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading;
+using WallpaperChange.Settings;
 
 namespace WallpaperChange
 {
     public class WallpaperChanger
     {
-        private TimeSpan _LastTimeSlot = TimeSpan.MinValue;
-        private bool _Running = false;
-        private Thread _Thread;
-        private SortedDictionary<TimeSpan, string> _TimeSlots = new SortedDictionary<TimeSpan, string>();
-        private int _TransitionSlices = 5;
-        private int _TransitionTime = 10;
-        private WallpaperStyle _WallpaperStyle = WallpaperStyle.Centered;
+        private readonly UserSettings _userSettings;
 
-        public void Start()
+        public WallpaperChanger()
         {
-            LoadConfig();
-            _Running = true;
-            ThreadStart starter = new ThreadStart(MainLoop);
-            _Thread = new Thread(starter);
-            _Thread.IsBackground = true;
-            _Thread.Name = "Main Loop";
-            _Thread.Priority = ThreadPriority.Lowest;
-            _Thread.Start();
-        }
-
-        public void Stop()
-        {
-            _Running = false;
-            _Thread.Join();
+            _userSettings = UserSettings.Load();
         }
 
         private static void MatrixBlend(string baseImagePath, string overlayImagePath, string resultpath, float alpha)
         {
-            using (Bitmap image1 = (Bitmap)Bitmap.FromFile(baseImagePath))
+            using (var image1 = (Bitmap) Image.FromFile(baseImagePath))
             {
-                using (Bitmap image2 = (Bitmap)Bitmap.FromFile(overlayImagePath))
+                using (var image2 = (Bitmap) Image.FromFile(overlayImagePath))
                 {
                     // just change the alpha
-                    ColorMatrix matrix = new ColorMatrix(new float[][]{
-                new float[] {1F, 0, 0, 0, 0},
-                new float[] {0, 1F, 0, 0, 0},
-                new float[] {0, 0, 1F, 0, 0},
-                new float[] {0, 0, 0, alpha, 0},
-                new float[] {0, 0, 0, 0, 1F}});
+                    var matrix = new ColorMatrix(new[]
+                    {
+                        new[] {1F, 0, 0, 0, 0},
+                        new[] {0, 1F, 0, 0, 0},
+                        new[] {0, 0, 1F, 0, 0},
+                        new[] {0, 0, 0, alpha, 0},
+                        new[] {0, 0, 0, 0, 1F}
+                    });
 
-                    ImageAttributes imageAttributes = new ImageAttributes();
+                    var imageAttributes = new ImageAttributes();
                     imageAttributes.SetColorMatrix(matrix);
 
-                    using (Graphics g = Graphics.FromImage(image1))
+                    using (var g = Graphics.FromImage(image1))
                     {
                         g.CompositingMode = CompositingMode.SourceOver;
                         g.CompositingQuality = CompositingQuality.HighQuality;
@@ -75,121 +57,64 @@ namespace WallpaperChange
             }
         }
 
-        private void ChangeWallpaper()
+        public FileAtTime Start(FileAtTime currentFileAtTime)
         {
-            LoadConfig();
-            DateTime now = DateTime.Now;
-            TimeSpan n = now - new DateTime(now.Year, now.Month, now.Day);
-            TimeSpan timeSlot = TimeSpan.MinValue;
-            foreach (TimeSpan key in _TimeSlots.Keys)
+            var now = DateTime.Now;
+            _userSettings.FileTimes.Sort();
+            var shouldBeFileAtTime = _userSettings.FileTimes.LastOrDefault(f => f.GetTimeOfDayDateTime() <= now);
+            if (shouldBeFileAtTime != null && currentFileAtTime == null)
             {
-                if (key <= n)
-                    timeSlot = key;
-                else
-                    break;
+                Win32Wallpaper.Set(shouldBeFileAtTime.GetWallpaperFileInfo(), _userSettings.WallpaperStyle);
+                return shouldBeFileAtTime;
             }
-            if (timeSlot == TimeSpan.MinValue)
-                return;
-            if (_LastTimeSlot != timeSlot)
+            if (shouldBeFileAtTime == null && currentFileAtTime != null)
             {
-                _LastTimeSlot = timeSlot;
-                FileInfo newWp = new FileInfo(_TimeSlots[timeSlot]);
-                FileInfo currentWp = new FileInfo(Path.Combine(Path.GetTempPath(), "wallpaper.bmp"));
-                /*if (!newWp.Exists)
-                    return;*/
-                if (currentWp.Exists)
-                {
-                    DoTransition(newWp, currentWp);
-                }
-                else
-                    Win32Wallpaper.Set(newWp, _WallpaperStyle);
+                Win32Wallpaper.Set(currentFileAtTime.GetWallpaperFileInfo(), _userSettings.WallpaperStyle);
+                return currentFileAtTime;
             }
-
+            if (shouldBeFileAtTime == null ||
+                (currentFileAtTime.TimeOfDay == shouldBeFileAtTime.TimeOfDay &&
+                 currentFileAtTime.WallpaperPath == shouldBeFileAtTime.WallpaperPath))
+            {
+                return shouldBeFileAtTime;
+            }
+            DoTransition(shouldBeFileAtTime.GetWallpaperFileInfo(), currentFileAtTime.GetWallpaperFileInfo());
+            return shouldBeFileAtTime;
         }
 
-        private void DoTransition(FileInfo newWallpaper, FileInfo currentWp)
+        private void DoTransition(FileInfo newWallpaper, FileInfo currentWallpaper)
         {
-            if (currentWp.Exists)
+            if (!newWallpaper.Exists || !currentWallpaper.Exists)
             {
-                FileInfo resultWp = new FileInfo(Path.Combine(Path.GetTempPath(), "transform.bmp"));
-                currentWp = currentWp.CopyTo(Path.Combine(Path.GetTempPath(), "original.bmp"), true);
-                currentWp.Refresh();
-                float alphaIncrement = 1.0f / _TransitionSlices;
-                int timeIncrement = Convert.ToInt32(_TransitionTime / _TransitionSlices);
-
-                for (float i = .0f; i <= 1f; i += alphaIncrement)
+                return;
+            }
+            var tranformWallpaper = new FileInfo(Path.Combine(Path.GetTempPath(), "transform.bmp"));
+            try
+            {
+                if (tranformWallpaper.Exists)
                 {
-                    if (!_Running)
-                        break;
-                    MatrixBlend(currentWp.FullName, newWallpaper.FullName, resultWp.FullName, i);
-                    resultWp.Refresh();
-                    Win32Wallpaper.Set(resultWp, _WallpaperStyle);
-                    resultWp.Delete();
-                    resultWp.Refresh();
+                    tranformWallpaper.Delete();
+                    tranformWallpaper.Refresh();
+                }
+                var alphaIncrement = 1.0f/_userSettings.GetTransitionSlices();
+                var timeIncrement =
+                    Convert.ToInt32(_userSettings.GetTransitionTimeMilliseconds()/_userSettings.GetTransitionSlices());
+
+                for (var i = .0f; i <= 1f; i += alphaIncrement)
+                {
+                    MatrixBlend(currentWallpaper.FullName, newWallpaper.FullName, tranformWallpaper.FullName, i);
+                    tranformWallpaper.Refresh();
+                    Win32Wallpaper.Set(tranformWallpaper, _userSettings.WallpaperStyle);
+                    tranformWallpaper.Delete();
+                    tranformWallpaper.Refresh();
                     Thread.Sleep(timeIncrement);
                 }
-                resultWp = newWallpaper.CopyTo(Path.Combine(Path.GetTempPath(), "wallpaper.bmp"), true);
-                resultWp.Refresh();
-                Win32Wallpaper.Set(resultWp, _WallpaperStyle);
-                resultWp.Refresh();
+                Win32Wallpaper.Set(newWallpaper, _userSettings.WallpaperStyle);
             }
-            //if (newWp.Exists)
-            //    Wallpaper.Set(newWp, Wallpaper.Style.Centered);
-        }
-
-        private void LoadConfig()
-        {
-            if (_TimeSlots == null)
-                _TimeSlots = new SortedDictionary<TimeSpan, string>();
-            else
-                _TimeSlots.Clear();
-            Regex time = new Regex("(?<hour>\\d?\\d):(?<min>\\d\\d)");
-            foreach (string item in ConfigurationManager.AppSettings.Keys)
+            finally
             {
-                Match m = time.Match(item);
-                string value = ConfigurationManager.AppSettings[item];
-                if (string.IsNullOrEmpty(value))
-                    continue;
-                if (m.Success)
-                {
-                    int hour = Convert.ToInt32(m.Groups["hour"].Value);
-                    int min = Convert.ToInt32(m.Groups["min"].Value);
-                    TimeSpan ts = new TimeSpan(hour, min, 0);
-                    _TimeSlots.Add(ts, value);
-                }
-                else if (item == "transition_slices")
-                {
-                    _TransitionSlices = Convert.ToInt32(value);
-                }
-                else if (item == "transition_time_ms")
-                {
-                    _TransitionTime = Convert.ToInt32(value);
-                }
-                else if (item == "style")
-                {
-                    try
-                    {
-                        _WallpaperStyle = (WallpaperStyle)Enum.Parse(typeof(WallpaperStyle), value);
-                    }
-                    catch
-                    {
-                        _WallpaperStyle = WallpaperStyle.Centered;
-                    }
-                }
-            }
-        }
-
-        private void MainLoop()
-        {
-            DateTime lastRan = DateTime.MinValue;
-            while (_Running)
-            {
-                if (DateTime.Now - lastRan > TimeSpan.FromMinutes(1))
-                {
-                    lastRan = DateTime.Now;
-                    ChangeWallpaper();
-                }
-                Thread.Sleep(1000);
+                if (tranformWallpaper.Exists) tranformWallpaper.Delete();
+                Win32Wallpaper.Set(newWallpaper, _userSettings.WallpaperStyle);
             }
         }
     }
