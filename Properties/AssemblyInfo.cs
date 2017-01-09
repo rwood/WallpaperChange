@@ -6,13 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("WallpaperChange")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Changes your wallpaper when you want it to. Goto: https://github.com/rwood/WallpaperChange")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+//[assembly: AssemblyCompany("Roger Wood")]
 [assembly: AssemblyProduct("WallpaperChange")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyCopyright("Copyright © Roger Wood 2017")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -32,5 +30,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.9.1.*")]
+//[assembly: AssemblyFileVersion("0.9.1.*")]
