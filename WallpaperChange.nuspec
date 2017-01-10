@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>WallpaperChange</id>
+    <version>$version$</version>
+    <title>WallpaperChange</title>
+    <authors>WallpaperChange</authors>
+    <owners>WallpaperChange</owners>
+    <licenseUrl>https://github.com/rwood/WallpaperChange</licenseUrl>
+    <projectUrl>https://github.com/rwood/WallpaperChange</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/rwood/WallpaperChange/master/favicon.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Changes the wallpaper based on the time of day.</description>
+    <copyright>Copyright Roger Wood 20017</copyright>
+  </metadata>
+  <files>
+    <file src="*.*" target="lib\net45\" exclude="*.pdb;*.nupkg;*.vshost.*"/>
+    <file src="BitDay\*.*" target="lib\net45\BitDay\" exclude="*.pdb;*.nupkg;*.vshost.*"/>
+  </files>
+</package>

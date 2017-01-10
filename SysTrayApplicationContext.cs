@@ -1,12 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Net.Mime;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
 using Squirrel;
@@ -17,15 +13,19 @@ namespace WallpaperChange
 {
     internal class SysTrayApplicationContext : ApplicationContext
     {
+        private const string CheckForApplicationUpdates = "Check for Updates";
+        private const string UpdateTheApplication = "Apply Updates";
         private readonly object _syncLock = new object();
         private ToolStripMenuItem _btnAbout;
         private ToolStripMenuItem _btnSettings;
         private ToolStripMenuItem _btnStop;
+        private ToolStripMenuItem _btnUpdates;
         private ContextMenuStrip _contextMenuStrip1;
         private FileAtTime _currentFileAtTime;
         private NotifyIcon _notifyIcon1;
-        private Timer _timer;
+        private Timer _updateTimer;
         private WallpaperChanger _wallpaperChanger;
+        private Timer _wallpaperTimer;
 
         private IContainer components;
 
@@ -51,6 +51,7 @@ namespace WallpaperChange
             _btnAbout = new ToolStripMenuItem();
             _btnStop = new ToolStripMenuItem();
             _btnSettings = new ToolStripMenuItem();
+            _btnUpdates = new ToolStripMenuItem();
             _contextMenuStrip1.SuspendLayout();
             _notifyIcon1.ContextMenuStrip = _contextMenuStrip1;
             var imgStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WallpaperChange.favicon.ico");
@@ -62,7 +63,7 @@ namespace WallpaperChange
             _notifyIcon1.Tag = "WallpaperChange";
             _notifyIcon1.Text = @"WallpaperChange";
             _notifyIcon1.Visible = true;
-            _contextMenuStrip1.Items.AddRange(new ToolStripItem[] {_btnAbout, _btnSettings, _btnStop});
+            _contextMenuStrip1.Items.AddRange(new ToolStripItem[] {_btnAbout, _btnUpdates, _btnSettings, _btnStop});
             _contextMenuStrip1.Name = "_contextMenuStrip1";
             _contextMenuStrip1.Size = new Size(176, 76);
             _btnAbout.Name = "_btnAbout";
@@ -77,12 +78,43 @@ namespace WallpaperChange
             _btnSettings.Text = @"Settings";
             _btnSettings.AutoSize = true;
             _btnSettings.Click += btnSettings_Click;
+            _btnUpdates.Name = "_btnUpdates";
+            _btnUpdates.Text = CheckForApplicationUpdates;
+            _btnUpdates.AutoSize = true;
+            _btnUpdates.Click += btnUpdates_Click;
             _contextMenuStrip1.ResumeLayout(false);
-            _timer = new Timer();
-            _timer.AutoReset = false;
-            _timer.Elapsed += _timer_Elapsed;
-            _timer.Interval = 10000;
-            _timer.Start();
+            _wallpaperTimer = new Timer {AutoReset = false};
+            _wallpaperTimer.Elapsed += WallpaperTimerElapsed;
+            _wallpaperTimer.Interval = 10000;
+            WallpaperTimerElapsed(null, null);
+            _updateTimer = new Timer {AutoReset = false};
+            _updateTimer.Elapsed += (sender, args) => CheckForUpdates();
+            _updateTimer.Interval = TimeSpan.FromDays(1).TotalMilliseconds;
+            CheckForUpdates();
+        }
+
+        private async void btnUpdates_Click(object sender, EventArgs e)
+        {
+            _btnUpdates.Enabled = false;
+            try
+            {
+                var btn = (ToolStripMenuItem) sender;
+                if (btn.Text == CheckForApplicationUpdates)
+                {
+                    CheckForUpdates();
+                }
+                if (btn.Text != UpdateTheApplication) return;
+                using (var updateManager = GetUpdateManager())
+                {
+                    await updateManager.UpdateApp();
+                    MessageBox.Show(@"WallpaperChange just got updated. Restarting...", @"Huzzah!");
+                }
+                UpdateManager.RestartApp();
+            }
+            finally
+            {
+                _btnUpdates.Enabled = true;
+            }
         }
 
         private void btnAbout_Click(object sender, EventArgs e)
@@ -90,7 +122,7 @@ namespace WallpaperChange
             new AboutBox().ShowDialog();
         }
 
-        private void _timer_Elapsed(object sender, ElapsedEventArgs e)
+        private void WallpaperTimerElapsed(object sender, ElapsedEventArgs e)
         {
             try
             {
@@ -110,37 +142,43 @@ namespace WallpaperChange
             }
             finally
             {
-                _timer.Start();
+                _wallpaperTimer.Start();
             }
         }
 
-        private async Task CheckForUpdates()
+        private async void CheckForUpdates()
         {
-            if (File.Exists("..\\Update.exe"))
+            try
             {
-                using (var mgr = new UpdateManager("http://tamarau.com/SybilClient"))
+                using (var updateManager = GetUpdateManager())
                 {
-                    var updateInfo = await mgr.CheckForUpdate();
-                    if (updateInfo != null)
+                    var updateInfo = await updateManager.CheckForUpdate();
+                    if (updateInfo == null || !updateInfo.ReleasesToApply.Any())
                     {
-                        Trace.WriteLine("Current Version: " + updateInfo.CurrentlyInstalledVersion.Version);
-                        Trace.WriteLine("Newest Version: " + updateInfo.FutureReleaseEntry.Version);
-                        Trace.WriteLine(updateInfo.ReleasesToApply.Count() + " releases to apply");
-                        if (updateInfo.ReleasesToApply.Any())
-                        {
-                            Trace.WriteLine("Getting Updates");
-                            await mgr.UpdateApp();
-                            Trace.WriteLine("Updates Applied, Please Restart Sybil Client");
-                            MessageBox.Show("Updates Applied, Please Restart Sybil Client");
-                        }
+                        _btnUpdates.Text = CheckForApplicationUpdates;
+                    }
+                    else
+                    {
+                        _btnUpdates.Text = UpdateTheApplication;
                     }
                 }
+                UserSettings.Load().HandleStartupShortcut();
             }
+            finally
+            {
+                _updateTimer.Start();
+            }
+        }
+
+        private UpdateManager GetUpdateManager()
+        {
+            return new UpdateManager("http://tamarau.com/WallpaperChange");
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-            _timer.Stop();
+            _updateTimer.Stop();
+            _wallpaperTimer.Stop();
             Application.Exit();
         }
 

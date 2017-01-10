@@ -19,6 +19,7 @@ namespace WallpaperChange.Settings
             cmbWallpaperStyle.DataSource = Enum.GetValues(typeof (WallpaperStyle));
             cmbWallpaperStyle.SelectedItem = _userSettings.WallpaperStyle;
             _userSettings.FileTimes.ForEach(u => pnlFileTimes.Controls.Add(new FileAndTimeControl(u, _userSettings)));
+            chkStartWithWindows.Checked = _userSettings.StartApplicationWithWindows;
         }
 
         public static SettingsForm GetInstance()
@@ -31,14 +32,16 @@ namespace WallpaperChange.Settings
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            foreach (FileAndTimeControl control in pnlFileTimes.Controls.OfType<FileAndTimeControl>())
+            foreach (var control in pnlFileTimes.Controls.OfType<FileAndTimeControl>())
             {
                 (control).SaveValues();
             }
             _userSettings.FileTimes.Sort();
             _userSettings.TransitionSlices = numTransitionSlices.Text;
             _userSettings.TransitionTimeMilliseconds = numTransitionTime.Text;
-            _userSettings.WallpaperStyle = (WallpaperStyle)cmbWallpaperStyle.SelectedItem;
+            _userSettings.WallpaperStyle = (WallpaperStyle) cmbWallpaperStyle.SelectedItem;
+            _userSettings.StartApplicationWithWindows = chkStartWithWindows.Checked;
+            _userSettings.HandleStartupShortcut();
             _userSettings.Save();
             Close();
         }
@@ -50,7 +53,7 @@ namespace WallpaperChange.Settings
 
         private void btnAddFileAndTime_Click(object sender, EventArgs e)
         {
-            FileAtTime fat = new FileAtTime();
+            var fat = new FileAtTime();
             _userSettings.FileTimes.Add(fat);
             pnlFileTimes.Controls.Add(new FileAndTimeControl(fat, _userSettings));
         }

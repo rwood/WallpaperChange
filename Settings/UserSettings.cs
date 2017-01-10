@@ -9,6 +9,7 @@ namespace WallpaperChange.Settings
     {
         public string TimeOfDay { get; set; }
         public string WallpaperPath { get; set; }
+
         public int CompareTo(FileAtTime obj)
         {
             return GetTimeOfDayDateTime().CompareTo(obj.GetTimeOfDayDateTime());
@@ -35,6 +36,8 @@ namespace WallpaperChange.Settings
         public WallpaperStyle WallpaperStyle { get; set; }
         public List<FileAtTime> FileTimes { get; set; }
 
+        public bool StartApplicationWithWindows { get; set; }
+
         public int GetTransitionSlices()
         {
             int val;
@@ -49,14 +52,28 @@ namespace WallpaperChange.Settings
 
         public void Save()
         {
-            File.WriteAllText(SettingsFilename, (new JavaScriptSerializer()).Serialize(this));
+            File.WriteAllText(GetSettingsFile().FullName, (new JavaScriptSerializer()).Serialize(this));
+        }
+
+        private static FileInfo GetSettingsFile()
+        {
+            var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                @"WallpaperChange",
+                SettingsFilename);
+            var file = new FileInfo(filePath);
+            if (file.Directory == null)
+            {
+                return new FileInfo(SettingsFilename);
+            }
+            return file;
         }
 
         public static UserSettings Load()
         {
-            if (File.Exists(SettingsFilename))
+            var settingsFile = GetSettingsFile();
+            if (settingsFile.Exists)
             {
-                return (new JavaScriptSerializer()).Deserialize<UserSettings>(File.ReadAllText(SettingsFilename));
+                return (new JavaScriptSerializer()).Deserialize<UserSettings>(File.ReadAllText(settingsFile.FullName));
             }
             return GetDefaultSettings();
         }
@@ -68,6 +85,7 @@ namespace WallpaperChange.Settings
                 WallpaperStyle = WallpaperStyle.Fill,
                 TransitionSlices = "10",
                 TransitionTimeMilliseconds = "5000",
+                StartApplicationWithWindows = true,
                 FileTimes = new List<FileAtTime>
                 {
                     new FileAtTime {TimeOfDay = "12:00 AM", WallpaperPath = "BitDay\\08-Late-Night.png"},
@@ -80,6 +98,22 @@ namespace WallpaperChange.Settings
                     new FileAtTime {TimeOfDay = "10:00 PM", WallpaperPath = "BitDay\\07-Night.png"}
                 }
             };
+        }
+
+        public void HandleStartupShortcut()
+        {
+            var startMenuPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs",
+                "WallpaperChange", "WallpaperChange.lnk");
+            var appShortcut = new FileInfo(startMenuPath);
+            var startupMenuPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup),
+                "WallpaperChange.lnk");
+            var appStartupShortcut = new FileInfo(startupMenuPath);
+            if (StartApplicationWithWindows && appShortcut.Exists)
+            {
+                appShortcut.CopyTo(appStartupShortcut.FullName, true);
+                return;
+            }
+            if (appStartupShortcut.Exists) appStartupShortcut.Delete();
         }
     }
 }

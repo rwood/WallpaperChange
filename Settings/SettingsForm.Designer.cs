@@ -39,6 +39,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.pnlFileTimes = new System.Windows.Forms.FlowLayoutPanel();
             this.btnAddFileAndTime = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.chkStartWithWindows = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numTransitionSlices)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numTransitionTime)).BeginInit();
             this.SuspendLayout();
@@ -165,6 +167,25 @@
             this.btnAddFileAndTime.UseVisualStyleBackColor = true;
             this.btnAddFileAndTime.Click += new System.EventHandler(this.btnAddFileAndTime_Click);
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(291, 9);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(156, 13);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "Start Application with Windows:";
+            // 
+            // chkStartWithWindows
+            // 
+            this.chkStartWithWindows.AutoSize = true;
+            this.chkStartWithWindows.Location = new System.Drawing.Point(453, 8);
+            this.chkStartWithWindows.Name = "chkStartWithWindows";
+            this.chkStartWithWindows.Size = new System.Drawing.Size(15, 14);
+            this.chkStartWithWindows.TabIndex = 15;
+            this.chkStartWithWindows.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkStartWithWindows.UseVisualStyleBackColor = true;
+            // 
             // SettingsForm
             // 
             this.AcceptButton = this.btnSave;
@@ -172,6 +193,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(623, 441);
+            this.Controls.Add(this.chkStartWithWindows);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.btnAddFileAndTime);
             this.Controls.Add(this.pnlFileTimes);
             this.Controls.Add(this.label3);
@@ -204,5 +227,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.FlowLayoutPanel pnlFileTimes;
         private System.Windows.Forms.Button btnAddFileAndTime;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox chkStartWithWindows;
     }
 }
