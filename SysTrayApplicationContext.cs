@@ -3,11 +3,10 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Timers;
 using System.Windows.Forms;
 using Squirrel;
 using WallpaperChange.Settings;
-using Timer = System.Timers.Timer;
+using Timer = System.Threading.Timer;
 
 namespace WallpaperChange
 {
@@ -26,6 +25,9 @@ namespace WallpaperChange
         private Timer _updateTimer;
         private WallpaperChanger _wallpaperChanger;
         private Timer _wallpaperTimer;
+
+        private TimeSpan _checkUpdatePeriod = TimeSpan.FromDays(1);
+        private TimeSpan _checkWallpaperPeriod = TimeSpan.FromSeconds(10);
 
         private IContainer components;
 
@@ -83,14 +85,8 @@ namespace WallpaperChange
             _btnUpdates.AutoSize = true;
             _btnUpdates.Click += btnUpdates_Click;
             _contextMenuStrip1.ResumeLayout(false);
-            _wallpaperTimer = new Timer {AutoReset = false};
-            _wallpaperTimer.Elapsed += WallpaperTimerElapsed;
-            _wallpaperTimer.Interval = 10000;
-            WallpaperTimerElapsed(null, null);
-            _updateTimer = new Timer {AutoReset = false};
-            _updateTimer.Elapsed += (sender, args) => CheckForUpdates();
-            _updateTimer.Interval = TimeSpan.FromDays(1).TotalMilliseconds;
-            CheckForUpdates();
+            _wallpaperTimer = new Timer(WallpaperTimerElapsed, null, _checkWallpaperPeriod, TimeSpan.FromMilliseconds(-1));
+            _updateTimer = new Timer(CheckForUpdates, null, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
         }
 
         private async void btnUpdates_Click(object sender, EventArgs e)
@@ -101,7 +97,7 @@ namespace WallpaperChange
                 var btn = (ToolStripMenuItem) sender;
                 if (btn.Text == CheckForApplicationUpdates)
                 {
-                    CheckForUpdates();
+                    CheckForUpdates(null);
                 }
                 if (btn.Text != UpdateTheApplication) return;
                 using (var updateManager = GetUpdateManager())
@@ -122,7 +118,7 @@ namespace WallpaperChange
             new AboutBox().ShowDialog();
         }
 
-        private void WallpaperTimerElapsed(object sender, ElapsedEventArgs e)
+        private void WallpaperTimerElapsed(object sender)
         {
             try
             {
@@ -142,11 +138,11 @@ namespace WallpaperChange
             }
             finally
             {
-                _wallpaperTimer.Start();
+                _wallpaperTimer.Change(_checkWallpaperPeriod, TimeSpan.FromMilliseconds(-1));
             }
         }
 
-        private async void CheckForUpdates()
+        private async void CheckForUpdates(object sender)
         {
             try
             {
@@ -166,7 +162,7 @@ namespace WallpaperChange
             }
             finally
             {
-                _updateTimer.Start();
+                _updateTimer.Change(_checkUpdatePeriod, TimeSpan.FromMilliseconds(-1));
             }
         }
 
@@ -177,8 +173,11 @@ namespace WallpaperChange
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-            _updateTimer.Stop();
-            _wallpaperTimer.Stop();
+            _updateTimer.Dispose();
+            lock (_syncLock)
+            {
+                _wallpaperTimer.Dispose();
+            }
             Application.Exit();
         }
 
