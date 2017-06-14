@@ -14,8 +14,8 @@ namespace WallpaperChange.Settings
         {
             InitializeComponent();
             _userSettings = UserSettings.Load();
-            numTransitionSlices.Text = _userSettings.TransitionSlices;
-            numTransitionTime.Text = _userSettings.TransitionTimeMilliseconds;
+            numTransitionSlices.Text = _userSettings.TransitionSlices.ToString();
+            numTransitionTime.Text = _userSettings.TransitionTimeMilliseconds.ToString();
             cmbWallpaperStyle.DataSource = Enum.GetValues(typeof (WallpaperStyle));
             cmbWallpaperStyle.SelectedItem = _userSettings.WallpaperStyle;
             _userSettings.FileTimes.ForEach(u => pnlFileTimes.Controls.Add(new FileAndTimeControl(u, _userSettings)));
@@ -30,15 +30,21 @@ namespace WallpaperChange.Settings
             return _instance;
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void Save_OnClick(object sender, EventArgs e)
         {
             foreach (var control in pnlFileTimes.Controls.OfType<FileAndTimeControl>())
             {
-                (control).SaveValues();
+                control.SaveValues();
             }
             _userSettings.FileTimes.Sort();
-            _userSettings.TransitionSlices = numTransitionSlices.Text;
-            _userSettings.TransitionTimeMilliseconds = numTransitionTime.Text;
+
+            int transitionSlices;
+            if(int.TryParse(numTransitionSlices.Text, out transitionSlices))
+                _userSettings.TransitionSlices = transitionSlices;
+            int transitionTimeMilliseconds;
+            if (int.TryParse(numTransitionTime.Text, out transitionTimeMilliseconds))
+                _userSettings.TransitionTimeMilliseconds = transitionTimeMilliseconds;
+
             _userSettings.WallpaperStyle = (WallpaperStyle) cmbWallpaperStyle.SelectedItem;
             _userSettings.StartApplicationWithWindows = chkStartWithWindows.Checked;
             _userSettings.HandleStartupShortcut();
@@ -46,7 +52,7 @@ namespace WallpaperChange.Settings
             Close();
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
+        private void Cancel_OnClick(object sender, EventArgs e)
         {
             Close();
         }

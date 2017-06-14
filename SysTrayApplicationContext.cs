@@ -69,19 +69,19 @@ namespace WallpaperChange
             _btnAbout.Name = "_btnAbout";
             _btnAbout.AutoSize = true;
             _btnAbout.Text = @"About";
-            _btnAbout.Click += btnAbout_Click;
+            _btnAbout.Click += About_OnClick;
             _btnStop.Name = "_btnStop";
             _btnStop.AutoSize = true;
             _btnStop.Text = @"Stop";
-            _btnStop.Click += btnStop_Click;
+            _btnStop.Click += Stop_OnClick;
             _btnSettings.Name = "_btnSettings";
             _btnSettings.Text = @"Settings";
             _btnSettings.AutoSize = true;
-            _btnSettings.Click += btnSettings_Click;
+            _btnSettings.Click += Settings_OnClick;
             _btnUpdates.Name = "_btnUpdates";
             _btnUpdates.Text = CheckForApplicationUpdates;
             _btnUpdates.AutoSize = true;
-            _btnUpdates.Click += btnUpdates_Click;
+            _btnUpdates.Click += Updates_OnClick;
             _contextMenuStrip1.ResumeLayout(false);
             _wallpaperTimer = new Timer {AutoReset = false};
             _wallpaperTimer.Elapsed += WallpaperTimerElapsed;
@@ -93,7 +93,7 @@ namespace WallpaperChange
             CheckForUpdates();
         }
 
-        private async void btnUpdates_Click(object sender, EventArgs e)
+        private async void Updates_OnClick(object sender, EventArgs e)
         {
             _btnUpdates.Enabled = false;
             try
@@ -107,7 +107,7 @@ namespace WallpaperChange
                 using (var updateManager = GetUpdateManager())
                 {
                     await updateManager.UpdateApp();
-                    MessageBox.Show(@"WallpaperChange just got updated. Restarting...", @"Huzzah!");
+                    MessageBox.Show("WallpaperChange just got updated. Restarting...", "Huzzah!");
                 }
                 UpdateManager.RestartApp();
             }
@@ -117,7 +117,7 @@ namespace WallpaperChange
             }
         }
 
-        private void btnAbout_Click(object sender, EventArgs e)
+        private static void About_OnClick(object sender, EventArgs e)
         {
             new AboutBox().ShowDialog();
         }
@@ -170,19 +170,19 @@ namespace WallpaperChange
             }
         }
 
-        private UpdateManager GetUpdateManager()
+        private static UpdateManager GetUpdateManager()
         {
             return new UpdateManager("http://tamarau.com/WallpaperChange");
         }
 
-        private void btnStop_Click(object sender, EventArgs e)
+        private void Stop_OnClick(object sender, EventArgs e)
         {
             _updateTimer.Stop();
             _wallpaperTimer.Stop();
             Application.Exit();
         }
 
-        private void btnSettings_Click(object sender, EventArgs e)
+        private static void Settings_OnClick(object sender, EventArgs e)
         {
             var settingsForm = SettingsForm.GetInstance();
             settingsForm.Show();

@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Reflection;
 using System.Windows.Forms;
-using Squirrel;
-using WallpaperChange.Settings;
 
 namespace WallpaperChange
 {

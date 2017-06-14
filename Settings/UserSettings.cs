@@ -31,25 +31,13 @@ namespace WallpaperChange.Settings
     {
         private const string SettingsFilename = "settings.json";
 
-        public string TransitionSlices { get; set; }
-        public string TransitionTimeMilliseconds { get; set; }
-        public WallpaperStyle WallpaperStyle { get; set; }
+        public int TransitionSlices { get; set; } = 10;
+        public int TransitionTimeMilliseconds { get; set; } = 5000;
+        public WallpaperStyle WallpaperStyle { get; set; } = WallpaperStyle.Fill;
         public List<FileAtTime> FileTimes { get; set; }
 
-        public bool StartApplicationWithWindows { get; set; }
-
-        public int GetTransitionSlices()
-        {
-            int val;
-            return int.TryParse(TransitionSlices, out val) && val > 0 ? val : 10;
-        }
-
-        public int GetTransitionTimeMilliseconds()
-        {
-            int val;
-            return int.TryParse(TransitionTimeMilliseconds, out val) && val > 0 ? val : 5000;
-        }
-
+        public bool StartApplicationWithWindows { get; set; } = true;
+        
         public void Save()
         {
             File.WriteAllText(GetSettingsFile().FullName, (new JavaScriptSerializer()).Serialize(this));
@@ -73,7 +61,7 @@ namespace WallpaperChange.Settings
             var settingsFile = GetSettingsFile();
             if (settingsFile.Exists)
             {
-                return (new JavaScriptSerializer()).Deserialize<UserSettings>(File.ReadAllText(settingsFile.FullName));
+                return new JavaScriptSerializer().Deserialize<UserSettings>(File.ReadAllText(settingsFile.FullName));
             }
             return GetDefaultSettings();
         }
@@ -82,20 +70,20 @@ namespace WallpaperChange.Settings
         {
             return new UserSettings
             {
-                WallpaperStyle = WallpaperStyle.Fill,
-                TransitionSlices = "10",
-                TransitionTimeMilliseconds = "5000",
-                StartApplicationWithWindows = true,
                 FileTimes = new List<FileAtTime>
                 {
-                    new FileAtTime {TimeOfDay = "12:00 AM", WallpaperPath = "BitDay\\08-Late-Night.png"},
-                    new FileAtTime {TimeOfDay = "05:00 AM", WallpaperPath = "BitDay\\01-Morning.png"},
-                    new FileAtTime {TimeOfDay = "10:00 AM", WallpaperPath = "BitDay\\02-Late-Morning.png"},
-                    new FileAtTime {TimeOfDay = "12:00 PM", WallpaperPath = "BitDay\\03-Afternoon.png"},
-                    new FileAtTime {TimeOfDay = "04:00 PM", WallpaperPath = "BitDay\\04-Late-Afternoon.png"},
-                    new FileAtTime {TimeOfDay = "06:00 PM", WallpaperPath = "BitDay\\05-Evening.png"},
-                    new FileAtTime {TimeOfDay = "08:00 PM", WallpaperPath = "BitDay\\06-Late-Evening.png"},
-                    new FileAtTime {TimeOfDay = "10:00 PM", WallpaperPath = "BitDay\\07-Night.png"}
+                    new FileAtTime {TimeOfDay = "0:01", WallpaperPath = "BitDay\\11-Mid-Night.png"},
+                    new FileAtTime {TimeOfDay = "2:00", WallpaperPath = "BitDay\\12-Late-Night.png"},
+                    new FileAtTime {TimeOfDay = "5:00", WallpaperPath = "BitDay\\01-Early-Morning.png"},
+                    new FileAtTime {TimeOfDay = "10:00", WallpaperPath = "BitDay\\02-Mid-Morning.png"},
+                    new FileAtTime {TimeOfDay = "11:00", WallpaperPath = "BitDay\\03-Late-Morning.png"},
+                    new FileAtTime {TimeOfDay = "12:00", WallpaperPath = "BitDay\\04-Early-Afternoon.png"},
+                    new FileAtTime {TimeOfDay = "13:00", WallpaperPath = "BitDay\\05-Mid-Afternoon.png"},
+                    new FileAtTime {TimeOfDay = "15:00", WallpaperPath = "BitDay\\06-Late-Afternoon.png"},
+                    new FileAtTime {TimeOfDay = "16:00", WallpaperPath = "BitDay\\07-Early-Evening.png"},
+                    new FileAtTime {TimeOfDay = "18:00", WallpaperPath = "BitDay\\08-Mid-Evening.png"},
+                    new FileAtTime {TimeOfDay = "20:00", WallpaperPath = "BitDay\\09-Late-Evening.png"},
+                    new FileAtTime {TimeOfDay = "22:00", WallpaperPath = "BitDay\\10-Early-Night.png"},
                 }
             };
         }

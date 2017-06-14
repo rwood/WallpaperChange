@@ -167,28 +167,40 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="add.png" />
-    <Content Include="BitDay\01-Morning.png">
+    <Content Include="BitDay\01-Early-Morning.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="BitDay\02-Late-Morning.png">
+    <Content Include="BitDay\02-Mid-Morning.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="BitDay\03-Afternoon.png">
+    <Content Include="BitDay\03-Late-Morning.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="BitDay\04-Late-Afternoon.png">
+    <Content Include="BitDay\04-Early-Afternoon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="BitDay\05-Evening.png">
+    <Content Include="BitDay\05-Mid-Afternoon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="BitDay\06-Late-Evening.png">
+    <Content Include="BitDay\06-Late-Afternoon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="BitDay\07-Night.png">
+    <Content Include="BitDay\07-Early-Evening.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="BitDay\08-Late-Night.png">
+    <Content Include="BitDay\08-Mid-Evening.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BitDay\09-Late-Evening.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BitDay\10-Early-Night.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BitDay\11-Mid-Night.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BitDay\12-Late-Night.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="cross.png" />
