@@ -86,7 +86,7 @@
             this.btnBrowse.TabIndex = 4;
             this.btnBrowse.Text = "Browse";
             this.btnBrowse.UseVisualStyleBackColor = true;
-            this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
+            this.btnBrowse.Click += new System.EventHandler(this.Browse_OnClick);
             // 
             // ofdBrowse
             // 
@@ -101,7 +101,7 @@
             this.btnRemove.Size = new System.Drawing.Size(23, 23);
             this.btnRemove.TabIndex = 5;
             this.btnRemove.UseVisualStyleBackColor = true;
-            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
+            this.btnRemove.Click += new System.EventHandler(this.Remove_OnClick);
             // 
             // FileAndTimeControl
             // 

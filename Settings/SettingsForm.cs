@@ -18,7 +18,14 @@ namespace WallpaperChange.Settings
             numTransitionTime.Text = _userSettings.TransitionTimeMilliseconds.ToString();
             cmbWallpaperStyle.DataSource = Enum.GetValues(typeof (WallpaperStyle));
             cmbWallpaperStyle.SelectedItem = _userSettings.WallpaperStyle;
-            _userSettings.FileTimes.ForEach(u => pnlFileTimes.Controls.Add(new FileAndTimeControl(u, _userSettings)));
+            foreach (var fileAtTime in _userSettings.FileTimes)
+            {
+                pnlFileTimes.Controls.Add(new FileAndTimeControl
+                {
+                    TimeOfDay = fileAtTime.TimeOfDay,
+                    WallpaperPath = fileAtTime.WallpaperPath,
+                });
+            }
             chkStartWithWindows.Checked = _userSettings.StartApplicationWithWindows;
         }
 
@@ -32,11 +39,10 @@ namespace WallpaperChange.Settings
 
         private void Save_OnClick(object sender, EventArgs e)
         {
-            foreach (var control in pnlFileTimes.Controls.OfType<FileAndTimeControl>())
-            {
-                control.SaveValues();
-            }
-            _userSettings.FileTimes.Sort();
+            _userSettings.FileTimes = pnlFileTimes.Controls.Cast<FileAndTimeControl>()
+                                                  .Select(c => new FileAtTime{ TimeOfDay = c.TimeOfDay, WallpaperPath = c.WallpaperPath})
+                                                  .OrderBy(f => f)
+                                                  .ToList();
 
             int transitionSlices;
             if(int.TryParse(numTransitionSlices.Text, out transitionSlices))
@@ -57,11 +63,9 @@ namespace WallpaperChange.Settings
             Close();
         }
 
-        private void btnAddFileAndTime_Click(object sender, EventArgs e)
+        private void AddFileAndTime_OnClick(object sender, EventArgs e)
         {
-            var fat = new FileAtTime();
-            _userSettings.FileTimes.Add(fat);
-            pnlFileTimes.Controls.Add(new FileAndTimeControl(fat, _userSettings));
+            pnlFileTimes.Controls.Add(new FileAndTimeControl());
         }
     }
 }

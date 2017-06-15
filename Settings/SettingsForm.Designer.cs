@@ -165,7 +165,7 @@
             this.btnAddFileAndTime.Size = new System.Drawing.Size(23, 23);
             this.btnAddFileAndTime.TabIndex = 11;
             this.btnAddFileAndTime.UseVisualStyleBackColor = true;
-            this.btnAddFileAndTime.Click += new System.EventHandler(this.btnAddFileAndTime_Click);
+            this.btnAddFileAndTime.Click += new System.EventHandler(this.AddFileAndTime_OnClick);
             // 
             // label5
             // 
