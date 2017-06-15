@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Web.Script.Serialization;
+using File = System.IO.File;
 
 namespace WallpaperChange.Settings
 {
@@ -40,16 +42,16 @@ namespace WallpaperChange.Settings
         
         public void Save()
         {
-            File.WriteAllText(GetSettingsFile().FullName, (new JavaScriptSerializer()).Serialize(this));
+            File.WriteAllText(GetSettingsFile().FullName, new JavaScriptSerializer().Serialize(this));
         }
 
         private static FileInfo GetSettingsFile()
         {
             var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                @"WallpaperChange",
+                "WallpaperChange",
                 SettingsFilename);
             var file = new FileInfo(filePath);
-            if (file.Directory == null)
+            if (file.Directory == null || !file.Directory.Exists)
             {
                 return new FileInfo(SettingsFilename);
             }
@@ -90,18 +92,18 @@ namespace WallpaperChange.Settings
 
         public void HandleStartupShortcut()
         {
-            var startMenuPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs",
-                "WallpaperChange", "WallpaperChange.lnk");
-            var appShortcut = new FileInfo(startMenuPath);
+            var exeLocation = Assembly.GetEntryAssembly().Location;
             var startupMenuPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup),
                 "WallpaperChange.lnk");
-            var appStartupShortcut = new FileInfo(startupMenuPath);
-            if (StartApplicationWithWindows && appShortcut.Exists)
+            
+            if (StartApplicationWithWindows)
             {
-                appShortcut.CopyTo(appStartupShortcut.FullName, true);
-                return;
+                Win32Wallpaper.CreateShortcut(startupMenuPath, exeLocation, description:"WallpaperChange Autostart");
             }
-            if (appStartupShortcut.Exists) appStartupShortcut.Delete();
+            else if(File.Exists(startupMenuPath))
+            {
+                File.Delete(startupMenuPath);
+            }
         }
     }
 }
