@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 using Squirrel;
 using WallpaperChange.Settings;
@@ -26,8 +27,8 @@ namespace WallpaperChange
         private WallpaperChanger _wallpaperChanger;
         private Timer _wallpaperTimer;
 
-        private TimeSpan _checkUpdatePeriod = TimeSpan.FromDays(1);
-        private TimeSpan _checkWallpaperPeriod = TimeSpan.FromSeconds(10);
+        private readonly TimeSpan _checkUpdatePeriod = TimeSpan.FromDays(1);
+        private readonly TimeSpan _checkWallpaperPeriod = TimeSpan.FromSeconds(10);
 
         private IContainer components;
 
@@ -85,8 +86,8 @@ namespace WallpaperChange
             _btnUpdates.AutoSize = true;
             _btnUpdates.Click += Updates_OnClick;
             _contextMenuStrip1.ResumeLayout(false);
-            _wallpaperTimer = new Timer(WallpaperTimerElapsed, null, _checkWallpaperPeriod, TimeSpan.FromMilliseconds(-1));
-            _updateTimer = new Timer(CheckForUpdates, null, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
+            _wallpaperTimer = new Timer(WallpaperTimerElapsed, null, _checkWallpaperPeriod, Timeout.InfiniteTimeSpan);
+            _updateTimer = new Timer(CheckForUpdates, null, TimeSpan.FromSeconds(30), Timeout.InfiniteTimeSpan);
         }
 
         private async void Updates_OnClick(object sender, EventArgs e)
@@ -138,7 +139,7 @@ namespace WallpaperChange
             }
             finally
             {
-                _wallpaperTimer.Change(_checkWallpaperPeriod, TimeSpan.FromMilliseconds(-1));
+                _wallpaperTimer.Change(_checkWallpaperPeriod, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -162,7 +163,7 @@ namespace WallpaperChange
             }
             finally
             {
-                _updateTimer.Change(_checkUpdatePeriod, TimeSpan.FromMilliseconds(-1));
+                _updateTimer.Change(_checkUpdatePeriod, Timeout.InfiniteTimeSpan);
             }
         }
 
