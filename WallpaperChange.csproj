@@ -239,6 +239,6 @@
       <Output TaskParameter="Assemblies" ItemName="myAssemblyInfo" />
     </GetAssemblyIdentity>
     <Exec Command="packages\NuGet.CommandLine.3.5.0\tools\NuGet.exe pack WallpaperChange.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
-    <Exec Command="packages\squirrel.windows.1.2.1\tools\Squirrel.exe --releasify $(OutDir)WallpaperChange.%(myAssemblyInfo.Version).nupkg -r=\\192.168.1.30\WallpaperChange\" />
+    <Exec Command="packages\squirrel.windows.1.2.1\tools\Squirrel.exe --releasify $(OutDir)WallpaperChange.%(myAssemblyInfo.Version).nupkg -r=\\192.168.1.5\Media\WebServer\WallpaperChange" />
   </Target>
 </Project>
