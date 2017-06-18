@@ -150,10 +150,9 @@ namespace WallpaperChange
             {
                 lock (_syncLock)
                 {
-                    if (_wallpaperChanger == null)
-                        _wallpaperChanger = new WallpaperChanger();
-                    else
+                    if (_wallpaperChanger != null)
                         return;
+                    _wallpaperChanger = new WallpaperChanger();
                 }
                 _currentFileAtTime = _wallpaperChanger.Start(_currentFileAtTime);
                 _wallpaperChanger = null;
