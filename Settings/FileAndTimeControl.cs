@@ -1,62 +1,52 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace WallpaperChange.Settings
 {
     public partial class FileAndTimeControl : UserControl
     {
-        private readonly FileAtTime _fileAtTime;
-        private readonly UserSettings _userSettings;
-        public FileAndTimeControl(FileAtTime fat, UserSettings userSettings)
+        public string TimeOfDay
         {
-            InitializeComponent();
-            _fileAtTime = fat;
-            _userSettings = userSettings;
-            dtpTimeOfDay.Text = fat.TimeOfDay;
-            txtFilePath.Text = fat.WallpaperPath;
-            if (!string.IsNullOrEmpty(txtFilePath.Text))
+            get { return dtpTimeOfDay.Text; }
+            set { dtpTimeOfDay.Text = value; }
+        }
+
+        public string WallpaperPath
+        {
+            get { return txtFilePath.Text; }
+            set
             {
-                var directoryInfo = new FileInfo(txtFilePath.Text).Directory;
-                if (directoryInfo != null)
+                txtFilePath.Text = value;
+
+                if (!string.IsNullOrEmpty(txtFilePath.Text))
                 {
-                    ofdBrowse.InitialDirectory = directoryInfo.FullName;
+                    var directoryInfo = new FileInfo(txtFilePath.Text).Directory;
+                    if (directoryInfo != null)
+                    {
+                        ofdBrowse.InitialDirectory = directoryInfo.FullName;
+                    }
                 }
             }
         }
 
-        private void btnBrowse_Click(object sender, EventArgs e)
+        public FileAndTimeControl()
+        {
+            InitializeComponent();
+        }
+
+        private void Browse_OnClick(object sender, EventArgs e)
         {
             var result = ofdBrowse.ShowDialog();
             if (result == DialogResult.OK)
             {
-                txtFilePath.Text = ofdBrowse.FileName;
+                WallpaperPath = ofdBrowse.FileName;
             }
         }
 
-        private void btnRemove_Click(object sender, EventArgs e)
+        private void Remove_OnClick(object sender, EventArgs e)
         {
-            _userSettings.FileTimes.Remove(_fileAtTime);
             Parent.Controls.Remove(this);
-        }
-
-        public void SaveValues()
-        {
-            if (!File.Exists(txtFilePath.Text))
-            {
-                _userSettings.FileTimes.Remove(_fileAtTime);
-            }
-            else
-            {
-                _fileAtTime.TimeOfDay = dtpTimeOfDay.Text;
-                _fileAtTime.WallpaperPath = txtFilePath.Text;
-            }
         }
     }
 }

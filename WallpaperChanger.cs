@@ -96,9 +96,9 @@ namespace WallpaperChange
                     tranformWallpaper.Delete();
                     tranformWallpaper.Refresh();
                 }
-                var alphaIncrement = 1.0f/_userSettings.GetTransitionSlices();
+                var alphaIncrement = 1.0f/_userSettings.TransitionSlices;
                 var timeIncrement =
-                    Convert.ToInt32(_userSettings.GetTransitionTimeMilliseconds()/_userSettings.GetTransitionSlices());
+                    Convert.ToInt32(_userSettings.TransitionTimeMilliseconds/_userSettings.TransitionSlices);
 
                 for (var i = .0f; i <= 1f; i += alphaIncrement)
                 {

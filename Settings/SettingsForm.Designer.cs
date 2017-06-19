@@ -72,7 +72,7 @@
             this.btnSave.TabIndex = 3;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.btnSave.Click += new System.EventHandler(this.Save_OnClick);
             // 
             // btnCancel
             // 
@@ -84,7 +84,7 @@
             this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.btnCancel.Click += new System.EventHandler(this.Cancel_OnClick);
             // 
             // numTransitionSlices
             // 
@@ -165,7 +165,7 @@
             this.btnAddFileAndTime.Size = new System.Drawing.Size(23, 23);
             this.btnAddFileAndTime.TabIndex = 11;
             this.btnAddFileAndTime.UseVisualStyleBackColor = true;
-            this.btnAddFileAndTime.Click += new System.EventHandler(this.btnAddFileAndTime_Click);
+            this.btnAddFileAndTime.Click += new System.EventHandler(this.AddFileAndTime_OnClick);
             // 
             // label5
             // 

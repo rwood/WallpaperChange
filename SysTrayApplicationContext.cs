@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Squirrel;
@@ -77,21 +78,21 @@ namespace WallpaperChange
             _btnAbout.Name = "_btnAbout";
             _btnAbout.AutoSize = true;
             _btnAbout.Text = @"About";
-            _btnAbout.Click += btnAbout_Click;
+            _btnAbout.Click += About_OnClick;
             _btnStop.Name = "_btnStop";
             _btnStop.AutoSize = true;
             _btnStop.Text = @"Stop";
-            _btnStop.Click += btnStop_Click;
+            _btnStop.Click += Stop_OnClick;
             _btnSettings.Name = "_btnSettings";
             _btnSettings.Text = @"Settings";
             _btnSettings.AutoSize = true;
-            _btnSettings.Click += btnSettings_Click;
+            _btnSettings.Click += Settings_OnClick;
             _btnUpdates.Name = "_btnUpdates";
             _btnUpdates.Text = CheckForApplicationUpdates;
             _btnUpdates.AutoSize = true;
-            _btnUpdates.Click += btnUpdates_Click;
+            _btnUpdates.Click += Updates_OnClick;
             _contextMenuStrip1.ResumeLayout(false);
-            _wallpaperTimer = new Timer(WallpaperTimerElapsed, null, _checkWallpaperPeriod, TimeSpan.FromMilliseconds(-1));
+            _wallpaperTimer = new Timer(WallpaperTimerElapsed, null, _checkWallpaperPeriod, Timeout.InfiniteTimeSpan);
             _updateTimer = new Timer(
                 s =>
                 {
@@ -99,15 +100,16 @@ namespace WallpaperChange
                     u.Wait();
                 },
                 null,
-                TimeSpan.FromDays(1),
-                TimeSpan.FromMilliseconds(-1));
+                TimeSpan.FromSeconds(30),
+                Timeout.InfiniteTimeSpan);
         }
 
-        private async void btnUpdates_Click(object sender, EventArgs e)
+        private async void Updates_OnClick(object sender, EventArgs e)
         {
             var errors = 0;
             _btnUpdates.Enabled = false;
             foreach (var updateUrl in _updateUrls)
+            {
                 try
                 {
                     var btn = (ToolStripMenuItem) sender;
@@ -134,9 +136,10 @@ namespace WallpaperChange
                 {
                     _btnUpdates.Enabled = true;
                 }
+            }
         }
 
-        private void btnAbout_Click(object sender, EventArgs e)
+        private static void About_OnClick(object sender, EventArgs e)
         {
             new AboutBox().ShowDialog();
         }
@@ -147,17 +150,16 @@ namespace WallpaperChange
             {
                 lock (_syncLock)
                 {
-                    if (_wallpaperChanger == null)
-                        _wallpaperChanger = new WallpaperChanger();
-                    else
+                    if (_wallpaperChanger != null)
                         return;
+                    _wallpaperChanger = new WallpaperChanger();
                 }
                 _currentFileAtTime = _wallpaperChanger.Start(_currentFileAtTime);
                 _wallpaperChanger = null;
             }
             finally
             {
-                _wallpaperTimer.Change(_checkWallpaperPeriod, TimeSpan.FromMilliseconds(-1));
+                _wallpaperTimer.Change(_checkWallpaperPeriod, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -192,13 +194,13 @@ namespace WallpaperChange
                 }
                 finally
                 {
-                    _updateTimer.Change(_checkUpdatePeriod, TimeSpan.FromMilliseconds(-1));
+                    _updateTimer.Change(_checkUpdatePeriod, Timeout.InfiniteTimeSpan);
                 }
             }
             return updates;
         }
 
-        private void btnStop_Click(object sender, EventArgs e)
+        private void Stop_OnClick(object sender, EventArgs e)
         {
             _updateTimer.Dispose();
             lock (_syncLock)
@@ -208,7 +210,7 @@ namespace WallpaperChange
             Application.Exit();
         }
 
-        private void btnSettings_Click(object sender, EventArgs e)
+        private static void Settings_OnClick(object sender, EventArgs e)
         {
             var settingsForm = SettingsForm.GetInstance();
             settingsForm.Show();

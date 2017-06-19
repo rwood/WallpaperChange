@@ -14,11 +14,18 @@ namespace WallpaperChange.Settings
         {
             InitializeComponent();
             _userSettings = UserSettings.Load();
-            numTransitionSlices.Text = _userSettings.TransitionSlices;
-            numTransitionTime.Text = _userSettings.TransitionTimeMilliseconds;
+            numTransitionSlices.Text = _userSettings.TransitionSlices.ToString();
+            numTransitionTime.Text = _userSettings.TransitionTimeMilliseconds.ToString();
             cmbWallpaperStyle.DataSource = Enum.GetValues(typeof (WallpaperStyle));
             cmbWallpaperStyle.SelectedItem = _userSettings.WallpaperStyle;
-            _userSettings.FileTimes.ForEach(u => pnlFileTimes.Controls.Add(new FileAndTimeControl(u, _userSettings)));
+            foreach (var fileAtTime in _userSettings.FileTimes)
+            {
+                pnlFileTimes.Controls.Add(new FileAndTimeControl
+                {
+                    TimeOfDay = fileAtTime.TimeOfDay,
+                    WallpaperPath = fileAtTime.WallpaperPath,
+                });
+            }
             chkStartWithWindows.Checked = _userSettings.StartApplicationWithWindows;
         }
 
@@ -30,15 +37,20 @@ namespace WallpaperChange.Settings
             return _instance;
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void Save_OnClick(object sender, EventArgs e)
         {
-            foreach (var control in pnlFileTimes.Controls.OfType<FileAndTimeControl>())
-            {
-                (control).SaveValues();
-            }
-            _userSettings.FileTimes.Sort();
-            _userSettings.TransitionSlices = numTransitionSlices.Text;
-            _userSettings.TransitionTimeMilliseconds = numTransitionTime.Text;
+            _userSettings.FileTimes = pnlFileTimes.Controls.Cast<FileAndTimeControl>()
+                                                  .Select(c => new FileAtTime{ TimeOfDay = c.TimeOfDay, WallpaperPath = c.WallpaperPath})
+                                                  .OrderBy(f => f)
+                                                  .ToList();
+
+            int transitionSlices;
+            if(int.TryParse(numTransitionSlices.Text, out transitionSlices))
+                _userSettings.TransitionSlices = transitionSlices;
+            int transitionTimeMilliseconds;
+            if (int.TryParse(numTransitionTime.Text, out transitionTimeMilliseconds))
+                _userSettings.TransitionTimeMilliseconds = transitionTimeMilliseconds;
+
             _userSettings.WallpaperStyle = (WallpaperStyle) cmbWallpaperStyle.SelectedItem;
             _userSettings.StartApplicationWithWindows = chkStartWithWindows.Checked;
             _userSettings.HandleStartupShortcut();
@@ -46,16 +58,14 @@ namespace WallpaperChange.Settings
             Close();
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
+        private void Cancel_OnClick(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void btnAddFileAndTime_Click(object sender, EventArgs e)
+        private void AddFileAndTime_OnClick(object sender, EventArgs e)
         {
-            var fat = new FileAtTime();
-            _userSettings.FileTimes.Add(fat);
-            pnlFileTimes.Controls.Add(new FileAndTimeControl(fat, _userSettings));
+            pnlFileTimes.Controls.Add(new FileAndTimeControl());
         }
     }
 }
