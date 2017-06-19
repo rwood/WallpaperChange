@@ -88,9 +88,13 @@ namespace WallpaperChange
             {
                 return;
             }
+            var fromBitmap = new FileInfo(Path.Combine(Path.GetTempPath(), "from.bmp"));
+            var toBitmap = new FileInfo(Path.Combine(Path.GetTempPath(), "to.bmp"));
             var tranformWallpaper = new FileInfo(Path.Combine(Path.GetTempPath(), "transform.bmp"));
             try
             {
+                CreateTempBitmap(currentWallpaper, fromBitmap);
+                CreateTempBitmap(newWallpaper, toBitmap);
                 if (tranformWallpaper.Exists)
                 {
                     tranformWallpaper.Delete();
@@ -102,7 +106,7 @@ namespace WallpaperChange
 
                 for (var i = .0f; i <= 1f; i += alphaIncrement)
                 {
-                    MatrixBlend(currentWallpaper.FullName, newWallpaper.FullName, tranformWallpaper.FullName, i);
+                    MatrixBlend(fromBitmap.FullName, toBitmap.FullName, tranformWallpaper.FullName, i);
                     tranformWallpaper.Refresh();
                     Win32Wallpaper.Set(tranformWallpaper, _userSettings.WallpaperStyle);
                     tranformWallpaper.Delete();
@@ -116,6 +120,19 @@ namespace WallpaperChange
                 if (tranformWallpaper.Exists) tranformWallpaper.Delete();
                 Win32Wallpaper.Set(newWallpaper, _userSettings.WallpaperStyle);
             }
+        }
+
+        public void CreateTempBitmap(FileInfo source, FileInfo destination)
+        {
+            if(destination.Exists) destination.Delete();
+            Bitmap orig = new Bitmap(source.FullName);
+            Bitmap clone = new Bitmap(orig.Width, orig.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+            using (Graphics gr = Graphics.FromImage(clone))
+            {
+                gr.DrawImage(orig, new Rectangle(0, 0, clone.Width, clone.Height));
+            }
+            clone.Save(destination.FullName, ImageFormat.Bmp);
+            destination.Refresh();
         }
     }
 }
