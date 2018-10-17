@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
 
 namespace WallpaperChange
@@ -11,8 +12,9 @@ namespace WallpaperChange
         {
             AppDomain.CurrentDomain.UnhandledException += (sender, eventArgs) =>
             {
-                Debugger.Launch();
-                MessageBox.Show(((Exception)eventArgs.ExceptionObject).Message);
+                var ex = (Exception) eventArgs.ExceptionObject;
+                MessageBox.Show(ex.Message);
+                File.WriteAllText($"Error_{Guid.NewGuid()}.txt", $"{ex.Message}{Environment.NewLine}{ex.StackTrace}");
             };
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

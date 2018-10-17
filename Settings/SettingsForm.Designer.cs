@@ -66,7 +66,7 @@
             // btnSave
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSave.Location = new System.Drawing.Point(455, 406);
+            this.btnSave.Location = new System.Drawing.Point(486, 452);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 3;
@@ -78,7 +78,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(536, 406);
+            this.btnCancel.Location = new System.Drawing.Point(567, 452);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 4;
@@ -152,7 +152,7 @@
             this.pnlFileTimes.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.pnlFileTimes.Location = new System.Drawing.Point(12, 86);
             this.pnlFileTimes.Name = "pnlFileTimes";
-            this.pnlFileTimes.Size = new System.Drawing.Size(599, 314);
+            this.pnlFileTimes.Size = new System.Drawing.Size(630, 360);
             this.pnlFileTimes.TabIndex = 10;
             this.pnlFileTimes.WrapContents = false;
             // 
@@ -160,7 +160,7 @@
             // 
             this.btnAddFileAndTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnAddFileAndTime.Image = ((System.Drawing.Image)(resources.GetObject("btnAddFileAndTime.Image")));
-            this.btnAddFileAndTime.Location = new System.Drawing.Point(12, 406);
+            this.btnAddFileAndTime.Location = new System.Drawing.Point(12, 452);
             this.btnAddFileAndTime.Name = "btnAddFileAndTime";
             this.btnAddFileAndTime.Size = new System.Drawing.Size(23, 23);
             this.btnAddFileAndTime.TabIndex = 11;
@@ -192,7 +192,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(623, 441);
+            this.ClientSize = new System.Drawing.Size(654, 487);
             this.Controls.Add(this.chkStartWithWindows);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.btnAddFileAndTime);
